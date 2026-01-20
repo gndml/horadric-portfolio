@@ -1,0 +1,96 @@
+# Market Policy Bot Configuration
+# Copy this file to config.yml and customize your thresholds
+# config.yml is gitignored - your settings stay private
+
+# =============================================================================
+# SYMBOLS TO TRACK
+# =============================================================================
+symbols:
+  SPY: "S&P 500 ETF"
+  QQQ: "Nasdaq-100 ETF"
+  IWM: "Russell 2000 ETF"
+  TLT: "20+ Year Treasury ETF"
+  HYG: "High Yield Corporate Bond ETF"
+  GLD: "Gold ETF"
+  # Note: VIX (^VIX), DXY (DX-Y.NYB), 10Y (^TNX), BTC (BTC-USD) are handled via yfinance proxies
+
+# =============================================================================
+# REGIME THRESHOLDS
+# =============================================================================
+# Market shifts to DEFENSIVE if ANY of these conditions are met
+regime:
+  # HYG (high yield bonds) 5-day return threshold
+  # Triggers on credit stress / spread widening
+  hyg_5d_threshold: -3.0
+
+  # DXY (dollar index) 5-day return threshold
+  # Triggers on dollar strength / liquidity tightening
+  dxy_5d_threshold: 2.0
+
+  # VIX level for elevated volatility
+  # Combined with "rising" check (today > yesterday)
+  vix_level_threshold: 30
+
+  # SPY intraday threshold for combined stress check
+  # Triggers when SPY drops this much AND TLT is also negative
+  spy_tlt_combined_threshold: -2.5
+
+# =============================================================================
+# ALERT RULES
+# =============================================================================
+rules:
+  # --- Stress Signals (Critical/High) ---
+
+  # Credit stress: HYG intraday drop
+  credit_stress_intraday: -1.5
+
+  # Credit stress: HYG 5-day drop
+  credit_stress_5d: -3.0
+
+  # Liquidity stress: DXY intraday spike
+  liquidity_stress_intraday: 1.0
+
+  # Liquidity stress: DXY 5-day gain
+  liquidity_stress_5d: 2.0
+
+  # Volatility: VIX absolute level
+  volatility_level: 30
+
+  # Volatility: VIX intraday spike percentage
+  volatility_spike: 8
+
+  # --- Leadership Signals (Medium) ---
+
+  # QQQ underperformance vs SPY (growth weakness)
+  growth_weakness_threshold: -1.5
+
+  # IWM underperformance vs SPY (small cap weakness)
+  smallcap_weakness_threshold: -2.0
+
+  # --- Sentiment Signals (Medium/Low) ---
+
+  # GLD and TLT both up (flight to safety)
+  defensive_hedge_bid: 1.5
+
+  # Rate shock: 10Y yield change in basis points
+  rate_shock_bps: 15
+
+  # --- Opportunity Signals (Medium/High) ---
+  # SPY drawdown levels from 52-week high
+  spy_drawdown_levels:
+    - -2
+    - -4
+    - -6
+    - -10
+    - -15
+    - -20
+
+# =============================================================================
+# COOLDOWNS (minutes)
+# =============================================================================
+# How long to wait before re-firing the same alert
+cooldowns:
+  critical: 45    # 45 minutes
+  high: 90        # 1.5 hours
+  medium: 240     # 4 hours
+  low: 1440       # 24 hours
