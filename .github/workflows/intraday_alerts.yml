@@ -1,0 +1,50 @@
+name: Intraday Alerts
+
+on:
+  schedule:
+    # Every 15 minutes during US market hours (9:30 AM - 4:00 PM ET)
+    # ET is UTC-5 in winter, UTC-4 in summer
+    # Using 14:00-21:00 UTC to cover 9:00 AM - 4:00 PM ET year-round
+    - cron: '*/15 14-21 * * 1-5'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  alert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Restore alert state cache
+        uses: actions/cache@v4
+        with:
+          path: state.json
+          key: alert-state-v1
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Copy config if not exists
+        run: |
+          if [ ! -f config.yml ]; then
+            cp config.example.yml config.yml
+          fi
+
+      - name: Run intraday alerts
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python -m src.main_alerts
+
+      - name: Save alert state cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: state.json
+          key: alert-state-v1
