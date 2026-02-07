@@ -1,3 +1,5 @@
+**!!! Work in Progress; Don't attempt to use or fork !!!**
+
 # Market Policy Bot
 
 A modular market monitoring system that delivers regime-aware alerts and daily reports via Telegram. Designed as a forkable template for systematic traders.
